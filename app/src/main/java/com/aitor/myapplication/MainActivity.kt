@@ -11,11 +11,15 @@ import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
-    private var numeroSecreto = 0
-    private lateinit var editNumero: EditText
-    private lateinit var button: Button
-    private lateinit var textHistorial: TextView
-    private lateinit var scrollHistorial: ScrollView
+    var numeroSecreto = 0
+    lateinit var editNumero: EditText
+    lateinit var button: Button
+    lateinit var textHistorial: TextView
+    lateinit var scrollHistorial: ScrollView
+    lateinit var contadorIntentos : TextView;
+    var intentos = 0
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,38 +29,51 @@ class MainActivity : AppCompatActivity() {
         button = findViewById(R.id.button)
         textHistorial = findViewById(R.id.textHistorial)
         scrollHistorial = findViewById(R.id.scrollHistorial)
+        contadorIntentos = findViewById(R.id.contador)
 
         button.setOnClickListener { comprobarNumero() }
 
         nuevaPartida()
+
     }
 
     private fun nuevaPartida() {
         numeroSecreto = Random.nextInt(1, 101)
         textHistorial.text = ""
+        intentos = 0
+        contadorIntentos.text = "Intentos: " + intentos
     }
 
     private fun comprobarNumero() {
         val texto = editNumero.text.toString()
+
 
         if (texto.isEmpty()) {
             Toast.makeText(this, "Escribe un número", Toast.LENGTH_SHORT).show()
             return
         }
 
+
         val num = texto.toInt()
 
         val mensaje: String
         if (num < numeroSecreto) {
             mensaje = "El número es más grande que " + num
+            intentos++
+            contadorIntentos.text = "Intentos: " + intentos
         } else if (num > numeroSecreto) {
             mensaje = "El número es más pequeño que " + num
+            intentos++
+            contadorIntentos.text = "Intentos: " + intentos
         } else {
             mensaje = "¡Correcto! Era el " + num
+            intentos++
+            contadorIntentos.text = "Intentos: " + intentos
         }
 
         Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show()
         editNumero.setText("")
+
 
         if (num == numeroSecreto) {
             nuevaPartida()
