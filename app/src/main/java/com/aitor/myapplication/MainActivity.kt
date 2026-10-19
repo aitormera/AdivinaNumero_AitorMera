@@ -1,4 +1,5 @@
 package com.aitor.myapplication
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -6,7 +7,9 @@ import android.widget.EditText
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import java.io.Serializable
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
@@ -33,8 +36,22 @@ class MainActivity : AppCompatActivity() {
 
         button.setOnClickListener { comprobarNumero() }
 
-        nuevaPartida()
+        if (savedInstanceState != null) {
+            numeroSecreto = savedInstanceState.getInt("numeroSecreto")
+            intentos = savedInstanceState.getInt("intentos")
+            contadorIntentos.text = "Intentos: $intentos"
+            textHistorial.text = savedInstanceState.getString("historial", "")
+        } else {
+            nuevaPartida()
+        }
 
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("numeroSecreto", numeroSecreto)
+        outState.putInt("intentos", intentos)
+        outState.putString("historial", textHistorial.text.toString())
     }
 
     private fun nuevaPartida() {
@@ -76,10 +93,31 @@ class MainActivity : AppCompatActivity() {
 
 
         if (num == numeroSecreto) {
-            nuevaPartida()
+            pedirNombre()
         } else {
             textHistorial.append(mensaje + "\n")
             scrollHistorial.post { scrollHistorial.fullScroll(View.FOCUS_DOWN) }
         }
     }
+    private fun pedirNombre() {
+        val input = EditText(this)
+        input.hint = "Tu nombre"
+
+        AlertDialog.Builder(this)
+            .setTitle("¡Has ganado!")
+            .setMessage("Introduce tu nombre para el ranking")
+            .setView(input)
+            .setCancelable(false)
+            .setPositiveButton("Aceptar") { _, _ ->
+                val nombre = input.text.toString().ifEmpty { "Anónimo" }
+                val intent = Intent(this, RankingActivity::class.java)
+                intent.putExtra("nombre", nombre)
+                intent.putExtra("intentos", intentos)
+                startActivity(intent)
+                nuevaPartida()
+            }
+            .show()
+    }
 }
+
+class Jugador(var nombre: String, var intentos: Int) : Serializable
